@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  hfd:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    command: tail -F anything
+    volumes:
+      - ./:/code
+    runtime: nvidia
+    network_mode: "host"
+    tty: true
+    restart: always  
