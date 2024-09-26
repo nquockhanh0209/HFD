@@ -1,0 +1,3 @@
+[submodule "GMDCSA24-A-Dataset-for-Human-Fall-Detection-in-Videos"]
+	path = GMDCSA24-A-Dataset-for-Human-Fall-Detection-in-Videos
+	url = git@github.com:ekramalam/GMDCSA24-A-Dataset-for-Human-Fall-Detection-in-Videos.git
