@@ -5,17 +5,18 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
-from C3D import create_C3D_model, frame_n
+import tensorflow as tf
+from C3D import frame_n
 from create_folder import featureBasePath1, zip_f_noExt, cams
 
 def getFeatureExtractor(weigthsPath, layer, verbose = False):
 
 
-    model = create_C3D_model(verbose)
-    model.load_weights(weigthsPath)
-    model.compile(loss='mean_squared_error', optimizer='sgd')
+    # model = tf.keras.models.load_model("trained.h5")
+    # model.load_weights(weigthsPath)
+    # model.compile(loss='mean_squared_error', optimizer='sgd')
 
-    return Model(inputs=model.input,outputs=model.get_layer(layer).output)
+    return tf.keras.models.load_model("trained.h5")
 
 def count_chunks(videoBasePath):
 
@@ -92,14 +93,14 @@ def preprocessVideos(videoBasePath, featureBasePath, verbose=True):
               # Subfolder doesn't exist, continue with the next one
               continue
             for videofile in videofiles:
-                filePath = os.path.join(path, videofile)
-                video = cv2.VideoCapture(filePath)
+                # filePath = os.path.join(path, videofile)
+                video = cv2.VideoCapture(0)
                 numframes = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
                 fps = int(video.get(cv2.CAP_PROP_FPS))
                 chunks = numframes//frame_n
-                if verbose:
-                    print(filePath)
-                    print("*** [Video Info] Number of frames: {} - fps: {} - chunks: {}".format(numframes, fps, chunks))
+                # if verbose:
+                #     print(filePath)
+                #     print("*** [Video Info] Number of frames: {} - fps: {} - chunks: {}".format(numframes, fps, chunks))
                 vid = []
                 videoFrames = []
                 while True:
@@ -156,7 +157,6 @@ def extractFeatures(weigthsPath, videoBasePath, featureBasePath='', verbose=True
             # if TC>=10:
             #   break
             # TC=TC+1
-
             try:
               videofiles = os.listdir(path)
 
@@ -165,15 +165,15 @@ def extractFeatures(weigthsPath, videoBasePath, featureBasePath='', verbose=True
               # Subfolder doesn't exist, continue with the next one
               continue
             for videofile in videofiles:
-                filePath = os.path.join(path, videofile)
-                video = cv2.VideoCapture(filePath)
+                # filePath = os.path.join(path, videofile)
+                video = cv2.VideoCapture(0)
                 numframes = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
                 AllVdoFrames=AllVdoFrames+numframes
                 fps = int(video.get(cv2.CAP_PROP_FPS))
                 chunks = numframes//frame_n
-                if verbose:
-                    print(filePath)
-                    print("*** [Video Info] Number of frames: {} - fps: {} - chunks: {}".format(numframes, fps, chunks))
+                # if verbose:
+                #     print(filePath)
+                #     print("*** [Video Info] Number of frames: {} - fps: {} - chunks: {}".format(numframes, fps, chunks))
                 vid = []
                 videoFrames = []
                 while True:
@@ -282,4 +282,4 @@ def get_labels_and_features_from_files(basePath, verbose=True):
 
 
 
-extractFeatures('weights/weights.h5', zip_f_noExt, featureBasePath1, True)
+extractFeatures(weigthsPath='weights/weights.h5', videoBasePath = zip_f_noExt, featureBasePath= featureBasePath1, verbose=True)
