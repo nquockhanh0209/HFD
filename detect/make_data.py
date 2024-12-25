@@ -12,11 +12,13 @@ class DataUtilities:
         self.save_path = "/home/khanh/HFD/dataset/"
     
     def convert_video_to_kinetics(self, label: str, saved_path_update: str = None):
+        index = 0
         for data_path in self.data_paths:
             source_dir = data_path
             # Walk through the directory tree
             for root, dirs, files in os.walk(source_dir):
                 for filename in files:
+                    index +=1
                     # Khởi tạo thư viện mediapipe
                     mpPose = mp.solutions.pose
                     pose = mpPose.Pose()
@@ -74,7 +76,13 @@ class DataUtilities:
                     # Write vào file csv
                     os.makedirs(self.save_path, exist_ok=True)
                     df  = pd.DataFrame(lm_list)
-                    df.to_csv(self.save_path + label + ".txt")
+                    df = df.apply(lambda x: pd.Series(x.dropna().values.flatten()), axis=1)
+                    df.insert(index, 'id', range(0, len(df)))
+                    csv_file_path = os.path.join(self.save_path, label + ".csv")
+                    if os.path.exists(csv_file_path):
+                        df.to_csv(csv_file_path, mode='a', header=False, index=False)
+                    else:
+                        df.to_csv(csv_file_path, mode='w', header=True, index=False)
                     cap.release()
                     cv2.destroyAllWindows()
 
