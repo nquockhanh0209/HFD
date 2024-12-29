@@ -12,7 +12,7 @@ mpPose = mp.solutions.pose
 pose = mpPose.Pose()
 mpDraw = mp.solutions.drawing_utils
 
-model = tf.keras.models.load_model("model.h5")
+model = tf.keras.models.load_model("/home/khanhv/code/human-activities-detection/model.h5")
 
 cap = cv2.VideoCapture(0)
 
@@ -30,7 +30,7 @@ def draw_landmark_on_image(mpDraw, results, img):
     mpDraw.draw_landmarks(img, results.pose_landmarks, mpPose.POSE_CONNECTIONS)
     for id, lm in enumerate(results.pose_landmarks.landmark):
         h, w, c = img.shape
-        print(id, lm)
+        # print(id, lm)
         cx, cy = int(lm.x * w), int(lm.y * h)
         cv2.circle(img, (cx, cy), 5, (255, 0, 0), cv2.FILLED)
     return img
@@ -61,14 +61,14 @@ def detect(model, lm_list):
     results = model.predict(lm_list)
     print(results)
     if results[0][0] > 0.5:
-        label = "SWING BODY"
+        label = "ADL"
     else:
-        label = "SWING HAND"
+        label = "Fall"
     return label
 
 
 i = 0
-warmup_frames = 60
+warmup_frames = 10
 
 while True:
 

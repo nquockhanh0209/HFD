@@ -3,28 +3,31 @@ from typing import List
 import cv2
 import mediapipe as mp
 import pandas as pd
-
+import tensorflow as tf
 class DataUtilities:
     data_video_paths: List[str]
     save_path: str
     def __init__(self, data_video_paths: List[str]):
         self.data_paths = data_video_paths
-        self.save_path = "/home/khanh/HFD/dataset/"
+        self.save_path = "./dataset/"
     
     def convert_video_to_kinetics(self, label: str, saved_path_update: str = None):
-        index = 0
+        self.save_path = self.save_path + saved_path_update
         for data_path in self.data_paths:
             source_dir = data_path
             # Walk through the directory tree
+            print(source_dir)
             for root, dirs, files in os.walk(source_dir):
+
                 for filename in files:
-                    index +=1
+                    print(filename)
                     # Khởi tạo thư viện mediapipe
                     mpPose = mp.solutions.pose
                     pose = mpPose.Pose()
                     mpDraw = mp.solutions.drawing_utils
                     # Đọc ảnh từ video
                     file_path = os.path.join(root, filename)
+                    print(file_path)
                     cap = cv2.VideoCapture(file_path)
 
                     lm_list = []
@@ -52,7 +55,7 @@ class DataUtilities:
                             cv2.circle(img, (cx, cy), 10, (0, 0, 255), cv2.FILLED)
                         return img
 
-
+                    
                     while True:
                         ret, frame = cap.read()
                         if ret:
@@ -71,13 +74,12 @@ class DataUtilities:
                             if cv2.waitKey(1) == ord('q'):
                                 break
                         else: break
-                    if saved_path_update:
-                        self.save_path = self.save_path + saved_path_update
+                    
+                        
                     # Write vào file csv
                     os.makedirs(self.save_path, exist_ok=True)
                     df  = pd.DataFrame(lm_list)
                     df = df.apply(lambda x: pd.Series(x.dropna().values.flatten()), axis=1)
-                    df.insert(index, 'id', range(0, len(df)))
                     csv_file_path = os.path.join(self.save_path, label + ".csv")
                     if os.path.exists(csv_file_path):
                         df.to_csv(csv_file_path, mode='a', header=False, index=False)
@@ -86,4 +88,10 @@ class DataUtilities:
                     cap.release()
                     cv2.destroyAllWindows()
 
-DataUtilities(["/home/khanh/HFD/dataset/HFD/videos/ADL/"]).convert_video_to_kinetics(label="ADL", saved_path_update="HFD/kinetics/")
+with tf.device('/GPU:0'): 
+    DataUtilities(["./dataset/HFD/videos/ADL/train"]).convert_video_to_kinetics(label="ADL", saved_path_update="HFD/kinetics/ADL/train/")
+    DataUtilities(["./dataset/HFD/videos/ADL/test"]).convert_video_to_kinetics(label="ADL", saved_path_update="HFD/kinetics/ADL/test/")
+
+    DataUtilities(["./dataset/HFD/videos/Fall/train"]).convert_video_to_kinetics(label="Fall", saved_path_update="HFD/kinetics/Fall/train/")
+    DataUtilities(["./dataset/HFD/videos/Fall/test"]).convert_video_to_kinetics(label="Fall", saved_path_update="HFD/kinetics/Fall/test/")
+
